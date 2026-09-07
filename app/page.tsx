@@ -147,7 +147,7 @@ export default function Home() {
             <div className="flex justify-between items-baseline mb-1">
               <h2 className="text-sm font-bold text-stone-200">상태별 확률 분포 (0% ~ 100%)</h2>
               <span className="text-[11px] text-amber-400 font-mono">
-                총 $\Omega_{'{total}'}$ = {totalMicrostates}
+                총 Ω = {totalMicrostates}
               </span>
             </div>
             <p className="text-[11px] text-stone-400 mb-3">
@@ -189,7 +189,7 @@ export default function Home() {
                       <span>
                         <strong className="text-amber-400 font-mono">{observedProb.toFixed(1)}%</strong>
                         <span className="text-stone-500 text-[10px] ml-1">
-                          (이론 {theoreticalProb.toFixed(1)}% / $\Omega$={omega})
+                          (이론 {theoreticalProb.toFixed(1)}% / Ω={omega})
                         </span>
                       </span>
                     </div>
