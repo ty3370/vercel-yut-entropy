@@ -187,7 +187,8 @@ export default function Home() {
                     <div className="flex justify-between text-stone-300 mb-1 text-[11px]">
                       <span className="font-medium text-stone-200">{getLabel(k)}</span>
                       <span>
-                        <strong className="text-amber-400 font-mono">{observedProb.toFixed(1)}%</strong>
+                        <span className="text-stone-300 font-mono mr-1.5">{count}회</span>
+                        <strong className="text-amber-400 font-mono">({observedProb.toFixed(1)}%)</strong>
                         <span className="text-stone-500 text-[10px] ml-1">
                           (이론 {theoreticalProb.toFixed(1)}% / Ω={omega})
                         </span>
