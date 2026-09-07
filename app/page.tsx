@@ -87,7 +87,7 @@ export default function Home() {
           윷놀이 & 열역학 제2법칙 (엔트로피)
         </h1>
         <p className="text-stone-400 text-xs md:text-sm">
-          거시상태를 구성하는 미시상태 수(Ω)가 클수록 엔트로피($S = k_B \ln \Omega$)가 높고 발생 확률이 극대화됩니다.
+          거시상태를 구성하는 미시상태 수(Ω)가 클수록 엔트로피(S)가 높고 발생 확률이 극대화됩니다.
         </p>
       </header>
 
@@ -182,7 +182,7 @@ export default function Home() {
             <div>
               <span className="text-stone-200 font-semibold">열역학적 평형 관점: </span>
               4개의 윷에서 ‘개(Ω=6)’가 ‘모(Ω=1)’나 ‘윷(Ω=1)’보다 훨씬 빈번하게 나타납니다. 
-              던지는 횟수($N$)가 늘어날수록 계는 무질서도(미시상태의 가짓수)가 가장 큰 상태에 압도적으로 머물게 됩니다.
+              던지는 횟수가 늘어날수록 계는 무질서도(미시상태의 가짓수)가 가장 큰 상태에 압도적으로 머물게 됩니다.
             </div>
           </div>
         </div>
