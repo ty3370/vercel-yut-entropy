@@ -20,9 +20,12 @@ export function YutScene({ states, isRolling }: YutSceneProps) {
         드래그하여 시점 회전
       </span>
       <Canvas camera={{ position: [0, 4, 4], fov: 45 }}>
+        {/* @ts-ignore */}
         <ambientLight intensity={0.8} />
+        {/* @ts-ignore */}
         <directionalLight position={[4, 8, 4]} intensity={1.2} />
         <Center>
+          {/* @ts-ignore */}
           <group>
             {states.map((isFlat, idx) => {
               const xOffset = (idx - (n - 1) / 2) * spacing;
