@@ -1,60 +1,65 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Award, RotateCcw, ArrowRight } from "lucide-react";
+import { Award, RotateCcw, ArrowRight } from "lucide-react";
 
-// 윷판 29개 점의 2D 평면 좌표 (SVG viewBox 0 0 400 400 기준)
-export const BOARD_POINTS: { [key: number]: { x: number; y: number } } = {
-  // 외곽선 (출발/골인: 0 ~ 20)
-  0: { x: 350, y: 350 },  // 출발 대기 / 입구
-  1: { x: 350, y: 280 },
-  2: { x: 350, y: 210 },
-  3: { x: 350, y: 140 },
-  4: { x: 350, y: 70 },
-  5: { x: 350, y: 50 },   // 우측 상단 모서리 (분기점 1)
-  6: { x: 280, y: 50 },
-  7: { x: 210, y: 50 },
-  8: { x: 140, y: 50 },
-  9: { x: 70, y: 50 },
-  10: { x: 50, y: 50 },   // 좌측 상단 모서리 (분기점 2)
-  11: { x: 50, y: 120 },
-  12: { x: 50, y: 190 },
-  13: { x: 50, y: 260 },
-  14: { x: 50, y: 330 },
-  15: { x: 50, y: 350 },   // 좌측 하단 모서리
-  16: { x: 120, y: 350 },
-  17: { x: 190, y: 350 },
-  18: { x: 260, y: 350 },
-  19: { x: 330, y: 350 },
-  20: { x: 370, y: 370 },  // 완주(골인)
-  // 대각선 1: 5번 모서리 -> 중심(23) -> 15번 모서리
-  21: { x: 300, y: 100 },
-  22: { x: 250, y: 150 },
-  23: { x: 200, y: 200 },  // 중앙 '방' (분기점 3)
-  24: { x: 150, y: 250 },
-  25: { x: 100, y: 300 },
-  // 대각선 2: 10번 모서리 -> 중심(23) -> 0번 모서리
-  26: { x: 100, y: 100 },
-  27: { x: 150, y: 150 },
-  28: { x: 250, y: 250 },
-  29: { x: 300, y: 300 },
-};
-
+// 10개 팀 고유 색상 팔레트
 const TEAM_COLORS = [
-  { name: "청팀", bg: "bg-blue-600", text: "text-blue-400", hex: "#2563eb" },
-  { name: "홍팀", bg: "bg-red-600", text: "text-red-400", hex: "#dc2626" },
-  { name: "녹팀", bg: "bg-emerald-600", text: "text-emerald-400", hex: "#059669" },
-  { name: "황팀", bg: "bg-amber-500", text: "text-amber-400", hex: "#d97706" },
+  { name: "1팀(청)", hex: "#2563eb" },
+  { name: "2팀(홍)", hex: "#dc2626" },
+  { name: "3팀(녹)", hex: "#16a34a" },
+  { name: "4팀(황)", hex: "#ca8a04" },
+  { name: "5팀(자)", hex: "#9333ea" },
+  { name: "6팀(하)", hex: "#06b6d4" },
+  { name: "7팀(분)", hex: "#ec4899" },
+  { name: "8팀(주)", hex: "#ea580c" },
+  { name: "9팀(라)", hex: "#84cc16" },
+  { name: "10팀(회)", hex: "#64748b" },
 ];
+
+// SVG 크기: 400 x 400, 외곽 꼭짓점: (60,60) ~ (340,340)
+// 간격 d = 70. 모서리 및 대각선 교차점이 기하학적으로 완벽히 일치하도록 설정
+export const BOARD_POINTS: { [key: number]: { x: number; y: number } } = {
+  // 외곽 테두리 (0: 참먹이/출발모서리, 반시계방향 0 -> 20)
+  0: { x: 340, y: 340 },  // 우하단 모서리 (출발/골인점)
+  1: { x: 340, y: 270 },
+  2: { x: 340, y: 200 },
+  3: { x: 340, y: 130 },
+  4: { x: 340, y: 60 },   // 우상단 모서리 (꺾임 1)
+  5: { x: 270, y: 60 },
+  6: { x: 200, y: 60 },
+  7: { x: 130, y: 60 },
+  8: { x: 60, y: 60 },    // 좌상단 모서리 (꺾임 2)
+  9: { x: 60, y: 130 },
+  10: { x: 60, y: 200 },
+  11: { x: 60, y: 270 },
+  12: { x: 60, y: 340 },  // 좌하단 모서리
+  13: { x: 130, y: 340 },
+  14: { x: 200, y: 340 },
+  15: { x: 270, y: 340 },
+
+  // 대각선 1: 4번 모서리(우상단) -> 중앙(방: 23) -> 12번 모서리(좌하단)
+  16: { x: 293, y: 107 },
+  17: { x: 247, y: 153 },
+  18: { x: 200, y: 200 }, // 정중앙 '방' (대각선 교차점)
+  19: { x: 153, y: 247 },
+  20: { x: 107, y: 293 },
+
+  // 대각선 2: 8번 모서리(좌상단) -> 중앙(방: 18) -> 0번 모서리(우하단)
+  21: { x: 107, y: 107 },
+  22: { x: 153, y: 153 },
+  23: { x: 247, y: 247 },
+  24: { x: 293, y: 293 },
+};
 
 interface Piece {
   id: number;
   pos: number; // -1: 대기실, 100: 완주(골인), 그 외: BOARD_POINTS 키
-  groupCount: number; // 업힌 말 수
+  groupCount: number; // 업힌 말 개수
 }
 
 interface YutBoardProps {
-  lastRoll: number | null; // 최근 윷 결과 (앞면 개수: 도=1, 개=2, 걸=3, 윷=4, 모=5 or 0)
+  lastRoll: number | null; // 나온 앞면(배) 개수: 1=도, 2=개, 3=걸, 4=윷, 0=모
 }
 
 export function YutBoard({ lastRoll }: YutBoardProps) {
@@ -63,8 +68,8 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
   const [currentTurn, setCurrentTurn] = useState<number>(0);
   const [winner, setWinner] = useState<number | null>(null);
 
-  // 팀별 말 상태 초기화 함수
-  const initTeams = (tCount: number, pCount: number) => {
+  // 팀별 말 목록 초기화
+  const initTeams = (tCount: number, pCount: number): Piece[][] => {
     return Array.from({ length: tCount }, () =>
       Array.from({ length: pCount }, (_, id) => ({ id, pos: -1, groupCount: 1 }))
     );
@@ -72,86 +77,108 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
 
   const [pieces, setPieces] = useState<Piece[][]>(() => initTeams(2, 3));
 
-  // 말 이동 계산 로직 (윷놀이 고유 경로 및 지름길)
+  // 정통 윷놀이 이동 경로 분기 규칙
   const getNextPosition = (startPos: number, steps: number): number => {
     let cur = startPos;
-    for (let i = 0; i < steps; i++) {
-      if (i === 0) {
-        // 첫 발자국 뗄 때의 코너 지름길 분기
-        if (cur === -1) { cur = 1; continue; }
-        if (cur === 5) { cur = 21; continue; }
-        if (cur === 10) { cur = 26; continue; }
-        if (cur === 23) { cur = 28; continue; } // 중앙 방에서 출발 시 우하향
+
+    for (let step = 0; step < steps; step++) {
+      if (step === 0) {
+        // 첫 발자국 출발 시 모서리 분기점 판별
+        if (cur === -1) { cur = 1; continue; }       // 대기실에서 출발
+        if (cur === 4) { cur = 16; continue; }      // 우상단 모서리에서 중앙으로 꺾임
+        if (cur === 8) { cur = 21; continue; }      // 좌상단 모서리에서 중앙으로 꺾임
+        if (cur === 18) { cur = 23; continue; }     // 중앙 '방'에서 우하단 출구 방향으로 진행
       }
-      // 일반 진행 경로
-      if (cur >= 1 && cur < 20) cur += 1;
-      else if (cur === 20) return 100; // 골인
+
+      // 외곽 경로 진행
+      if (cur >= 1 && cur <= 3) cur += 1;
+      else if (cur === 4) cur = 5;
+      else if (cur >= 5 && cur <= 7) cur += 1;
+      else if (cur === 8) cur = 9;
+      else if (cur >= 9 && cur <= 11) cur += 1;
+      else if (cur === 12) cur = 13;
+      else if (cur >= 13 && cur <= 15) cur += 1;
+      else if (cur === 15) cur = 0;                 // 골인 직전 마지막 참(모서리)
+      else if (cur === 0) return 100;               // 0번 참을 지나면 완주(골인)
+
+      // 대각선 1 진행 (우상단 -> 좌하단)
+      else if (cur === 16) cur = 17;
+      else if (cur === 17) cur = 18;                // 중앙 방 진입
+      else if (cur === 18) cur = 19;
+      else if (cur === 19) cur = 20;
+      else if (cur === 20) cur = 12;                // 좌하단 모서리로 합류
+
+      // 대각선 2 진행 (좌상단 -> 중앙 -> 우하단)
       else if (cur === 21) cur = 22;
-      else if (cur === 22) cur = 23;
+      else if (cur === 22) cur = 18;                // 중앙 방 진입
       else if (cur === 23) cur = 24;
-      else if (cur === 24) cur = 25;
-      else if (cur === 25) cur = 15;
-      else if (cur === 26) cur = 27;
-      else if (cur === 27) cur = 23;
-      else if (cur === 28) cur = 29;
-      else if (cur === 29) cur = 20;
+      else if (cur === 24) return 100;              // 우하단 대각선 출구 직통 완주
     }
-    return cur > 20 && cur < 21 ? 100 : cur;
+
+    return cur;
   };
 
-  // 말 선택 및 이동 핸들러
+  // 말 선택 및 이동 실행
   const handleMovePiece = (pieceIdx: number) => {
     if (winner !== null || lastRoll === null) return;
-    
-    // 이동할 칸 수: 전통 윷(0개 배=모=5칸), 그 외엔 나온 배의 개수만큼 이동 (0칸이면 이동 불가)
+
+    // 0개 앞면(모) = 5칸, 윷 = 4칸, 걸 = 3칸, 개 = 2칸, 도 = 1칸
     const steps = lastRoll === 0 ? 5 : lastRoll;
     if (steps <= 0) return;
 
-    const currentPiece = pieces[currentTurn][pieceIdx];
-    if (currentPiece.pos === 100) return; // 이미 완주한 말
+    const targetPiece = pieces[currentTurn][pieceIdx];
+    if (targetPiece.pos === 100) return;
 
-    const nextPos = getNextPosition(currentPiece.pos, steps);
+    const oldPos = targetPiece.pos;
+    const nextPos = getNextPosition(oldPos, steps);
+
     const updated = pieces.map((team) => team.map((p) => ({ ...p })));
 
-    // 같은 위치에 있던 아군 말(업힌 말) 함께 이동
-    const movingGroup = updated[currentTurn].filter((p) => p.pos === currentPiece.pos);
-    movingGroup.forEach((p) => (p.pos = nextPos));
+    // [버그 수정 핵심]: 대기실(-1)에 있는 말들은 각자 독립적이어야 함.
+    // 판 위에 이미 올라와서 같은 위치(oldPos !== -1)에 있는 아군 말들만 함께 이동(업기).
+    const movingPieces = updated[currentTurn].filter((p) =>
+      oldPos === -1 ? p.id === targetPiece.id : p.pos === oldPos
+    );
 
-    let caughtOther = false;
+    movingPieces.forEach((p) => {
+      p.pos = nextPos;
+    });
 
-    // 도착한 위치가 골인이 아닌 일반 판 위라면
+    let caughtOpponent = false;
+
     if (nextPos !== 100) {
       // 1. 상대 말 잡기
       updated.forEach((team, tIdx) => {
         if (tIdx !== currentTurn) {
           team.forEach((p) => {
             if (p.pos === nextPos) {
-              p.pos = -1; // 시작 대기실로 퇴장
+              p.pos = -1; // 잡힌 상대 말은 대기실로 귀환
               p.groupCount = 1;
-              caughtOther = true;
+              caughtOpponent = true;
             }
           });
         }
       });
 
       // 2. 아군 말 업기
-      const alliesAtDest = updated[currentTurn].filter((p) => p.pos === nextPos);
-      const totalGroup = alliesAtDest.length;
-      alliesAtDest.forEach((p) => (p.groupCount = totalGroup));
+      const samePositionAllies = updated[currentTurn].filter((p) => p.pos === nextPos);
+      const totalInStack = samePositionAllies.length;
+      samePositionAllies.forEach((p) => {
+        p.groupCount = totalInStack;
+      });
     }
 
-    // 완주 여부 확인
-    const allFinished = updated[currentTurn].every((p) => p.pos === 100);
+    // 완주 검사
+    const isTeamFinished = updated[currentTurn].every((p) => p.pos === 100);
     setPieces(updated);
 
-    if (allFinished) {
+    if (isTeamFinished) {
       setWinner(currentTurn);
       return;
     }
 
-    // 윷(4)이나 모(5/0), 또는 상대를 잡았을 때 턴 유지 규칙 적용 가능
-    // 기본적으로는 다음 팀에게 턴 넘기기
-    if (!caughtOther && lastRoll !== 4 && lastRoll !== 0) {
+    // 윷(4), 모(0/5)가 아니거나 상대를 잡지 않았으면 다음 팀으로 턴 넘기기
+    if (!caughtOpponent && lastRoll !== 4 && lastRoll !== 0) {
       setCurrentTurn((prev) => (prev + 1) % teamCount);
     }
   };
@@ -164,59 +191,74 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
 
   return (
     <div className="bg-stone-900 border border-stone-800 p-5 rounded-xl flex flex-col md:flex-row gap-6 mt-6">
-      {/* 좌측: 실물 윷놀이 SVG 보드 */}
+      {/* 윷판 SVG 시각화 뷰 */}
       <div className="flex-1 flex flex-col items-center">
         <div className="w-full flex justify-between items-center mb-2">
-          <h2 className="text-sm font-bold text-stone-200 flex items-center gap-1.5">
-            전통 윷판 시스템
-          </h2>
-          <span className="text-xs px-2 py-0.5 rounded font-semibold text-white shadow-sm" style={{ backgroundColor: TEAM_COLORS[currentTurn].hex }}>
+          <h2 className="text-sm font-bold text-stone-200">정통 윷판 시스템</h2>
+          <span
+            className="text-xs px-2.5 py-1 rounded font-semibold text-white shadow-sm"
+            style={{ backgroundColor: TEAM_COLORS[currentTurn].hex }}
+          >
             현재 턴: {TEAM_COLORS[currentTurn].name}
           </span>
         </div>
 
-        <div className="w-full max-w-[340px] aspect-square bg-stone-950 border border-stone-800 rounded-lg p-2 relative shadow-inner">
+        <div className="w-full max-w-[360px] aspect-square bg-stone-950 border border-stone-800 rounded-lg p-3 relative shadow-inner">
           <svg viewBox="0 0 400 400" className="w-full h-full">
-            {/* 외곽선 및 대각선 경로 선 */}
-            <rect x="50" y="50" width="300" height="300" fill="none" stroke="#44403c" strokeWidth="2" />
-            <line x1="50" y1="50" x2="350" y2="350" stroke="#44403c" strokeWidth="2" />
-            <line x1="350" y1="50" x2="50" y2="350" stroke="#44403c" strokeWidth="2" />
+            {/* 정사각 외곽 틀 */}
+            <rect x="60" y="60" width="280" height="280" fill="none" stroke="#44403c" strokeWidth="2.5" />
+            {/* 대각선 2개 */}
+            <line x1="60" y1="60" x2="340" y2="340" stroke="#44403c" strokeWidth="2.5" />
+            <line x1="340" y1="60" x2="60" y2="340" stroke="#44403c" strokeWidth="2.5" />
 
             {/* 윷판 29개 점 그리기 */}
-            {Object.entries(BOARD_POINTS).map(([id, pt]) => {
-              const isSpecial = [5, 10, 15, 20, 23].includes(Number(id));
+            {Object.entries(BOARD_POINTS).map(([idStr, pt]) => {
+              const id = Number(idStr);
+              // 모서리 4점(0, 4, 8, 12)과 중앙 방(18)은 큰 점
+              const isCornerOrCenter = [0, 4, 8, 12, 18].includes(id);
+
               return (
                 <circle
                   key={id}
                   cx={pt.x}
                   cy={pt.y}
-                  r={isSpecial ? 9 : 6}
-                  className={isSpecial ? "fill-amber-600/60 stroke-amber-400 stroke-2" : "fill-stone-800 stroke-stone-600 stroke-1"}
+                  r={isCornerOrCenter ? 10 : 6}
+                  className={
+                    isCornerOrCenter
+                      ? "fill-amber-600/60 stroke-amber-400 stroke-2"
+                      : "fill-stone-800 stroke-stone-600 stroke-1"
+                  }
                 />
               );
             })}
 
-            {/* 판 위의 말(Piece) 렌더링 */}
+            {/* 판 위의 말 렌더링 (겹치지 않게 팀별 방사형 오프셋 배치) */}
             {pieces.map((team, tIdx) =>
               team.map((piece) => {
                 if (piece.pos === -1 || piece.pos === 100) return null;
                 const pt = BOARD_POINTS[piece.pos];
                 if (!pt) return null;
-                const offset = (tIdx - (teamCount - 1) / 2) * 8;
+
+                // 10팀까지 겹쳐도 식별 가능하도록 각도 기반 오프셋 부여
+                const angle = (tIdx / teamCount) * 2 * Math.PI;
+                const radius = teamCount > 4 ? 9 : 6;
+                const offsetX = Math.cos(angle) * radius;
+                const offsetY = Math.sin(angle) * radius;
+
                 return (
                   <g key={`${tIdx}-${piece.id}`}>
                     <circle
-                      cx={pt.x + offset}
-                      cy={pt.y}
-                      r={7}
+                      cx={pt.x + offsetX}
+                      cy={pt.y + offsetY}
+                      r={6}
                       fill={TEAM_COLORS[tIdx].hex}
                       stroke="#ffffff"
                       strokeWidth="1.5"
                     />
                     {piece.groupCount > 1 && (
                       <text
-                        x={pt.x + offset}
-                        y={pt.y + 3}
+                        x={pt.x + offsetX}
+                        y={pt.y + offsetY + 3}
                         fontSize="8"
                         textAnchor="middle"
                         fill="#ffffff"
@@ -233,34 +275,43 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
         </div>
       </div>
 
-      {/* 우측: 팀/말 설정 및 게임 인터랙션 컨트롤러 */}
-      <div className="w-full md:w-64 flex flex-col justify-between">
+      {/* 우측 조작 및 설정 패널 */}
+      <div className="w-full md:w-72 flex flex-col justify-between">
         <div className="flex flex-col gap-3">
-          {/* 환경설정: 팀 수 & 말 수 */}
-          <div className="bg-stone-950/70 border border-stone-800/80 p-3 rounded-lg flex flex-col gap-2.5 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-stone-400">참여 팀 수</span>
-              <div className="flex gap-1">
-                {[2, 3, 4].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => { setTeamCount(n); handleResetBoard(n, pieceCount); }}
-                    className={`px-2 py-0.5 rounded text-[11px] ${teamCount === n ? "bg-amber-600 text-white font-bold" : "bg-stone-800 text-stone-400"}`}
-                  >
-                    {n}팀
-                  </button>
-                ))}
+          {/* 설정부: 팀 수(최대 10팀) & 말 개수 */}
+          <div className="bg-stone-950/70 border border-stone-800/80 p-3 rounded-lg flex flex-col gap-3 text-xs">
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-stone-400 font-medium">참여 팀 수 (최대 10팀)</span>
+                <strong className="text-amber-400 font-bold">{teamCount}개 팀</strong>
               </div>
+              <input
+                type="range"
+                min="2"
+                max="10"
+                value={teamCount}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setTeamCount(val);
+                  handleResetBoard(val, pieceCount);
+                }}
+                className="w-full accent-amber-500 cursor-pointer h-1.5 bg-stone-800 rounded-lg"
+              />
             </div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-stone-400">팀당 말 개수</span>
+            <div className="flex justify-between items-center pt-2 border-t border-stone-800">
+              <span className="text-stone-400 font-medium">팀당 말 개수</span>
               <div className="flex gap-1">
                 {[1, 2, 3, 4].map((n) => (
                   <button
                     key={n}
-                    onClick={() => { setPieceCount(n); handleResetBoard(teamCount, n); }}
-                    className={`px-2 py-0.5 rounded text-[11px] ${pieceCount === n ? "bg-amber-600 text-white font-bold" : "bg-stone-800 text-stone-400"}`}
+                    onClick={() => {
+                      setPieceCount(n);
+                      handleResetBoard(teamCount, n);
+                    }}
+                    className={`px-2.5 py-0.5 rounded text-xs transition ${
+                      pieceCount === n ? "bg-amber-600 text-white font-bold" : "bg-stone-800 text-stone-400"
+                    }`}
                   >
                     {n}개
                   </button>
@@ -271,25 +322,26 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
 
           {/* 승리 알림 */}
           {winner !== null && (
-            <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg flex items-center gap-2 text-amber-300 text-xs font-bold">
-              <Award className="w-4 h-4 text-amber-400" />
+            <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg flex items-center gap-2 text-amber-300 text-xs font-bold animate-pulse">
+              <Award className="w-4 h-4 text-amber-400 shrink-0" />
               {TEAM_COLORS[winner].name}이 모든 말을 완주시켜 승리했습니다!
             </div>
           )}
 
-          {/* 말 이동 조작 리스트 */}
+          {/* 각 개별 말 조작 리스트 (독립 이동) */}
           <div>
             <div className="text-xs text-stone-300 font-semibold mb-2 flex justify-between">
-              <span>{TEAM_COLORS[currentTurn].name} 말 이동 선택</span>
-              <span className="text-amber-400">
+              <span>{TEAM_COLORS[currentTurn].name} 말 선택</span>
+              <span className="text-amber-400 font-mono">
                 {lastRoll === null ? "윷 던지기 대기" : lastRoll === 0 ? "모 (5칸)" : `${lastRoll}칸 전진`}
               </span>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-1">
               {pieces[currentTurn].map((p, idx) => {
                 const isFinished = p.pos === 100;
                 const isWaiting = p.pos === -1;
+
                 return (
                   <button
                     key={idx}
@@ -297,9 +349,15 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
                     disabled={isFinished || lastRoll === null}
                     className="flex justify-between items-center bg-stone-800 hover:bg-stone-700 disabled:opacity-40 disabled:pointer-events-none px-3 py-2 rounded text-xs text-stone-200 transition"
                   >
-                    <span>
-                      말 #{idx + 1}{" "}
-                      {p.groupCount > 1 && <strong className="text-amber-400">({p.groupCount}동)</strong>}
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full inline-block"
+                        style={{ backgroundColor: TEAM_COLORS[currentTurn].hex }}
+                      />
+                      <span>말 #{idx + 1}</span>
+                      {p.groupCount > 1 && (
+                        <span className="text-amber-400 text-[10px] font-bold">({p.groupCount}동)</span>
+                      )}
                     </span>
                     <span className="text-[11px] text-stone-400 flex items-center gap-1">
                       {isFinished ? "완주(골인)" : isWaiting ? "대기실 (출발)" : `${p.pos}번 칸`}
@@ -315,7 +373,7 @@ export function YutBoard({ lastRoll }: YutBoardProps) {
         {/* 윷판 리셋 버튼 */}
         <button
           onClick={() => handleResetBoard()}
-          className="mt-4 flex items-center justify-center gap-1 bg-stone-800 hover:bg-stone-700 text-stone-300 py-2 rounded text-xs transition"
+          className="mt-4 flex items-center justify-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 py-2 rounded text-xs transition"
         >
           <RotateCcw className="w-3.5 h-3.5" /> 윷판 초기화
         </button>
