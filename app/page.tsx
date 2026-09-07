@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { RotateCcw, Play, FastForward, Info } from "lucide-react";
-import { YutBoard } from "@/components/YutBoard";
 
 // 클라이언트 사이드에서만 Three.js 캔버스 로딩
 const YutScene = dynamic(
@@ -26,7 +25,6 @@ export default function Home() {
   const [counts, setCounts] = useState<{ [key: number]: number }>({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 });
   const [totalThrows, setTotalThrows] = useState<number>(0);
   const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [lastRoll, setLastRoll] = useState<number | null>(null); // 최근 윷 결과 (윷판 말 이동용)
 
   // 윷 개수 변경 시 초기화
   const handleStickCountChange = (newCount: number) => {
@@ -37,7 +35,6 @@ export default function Home() {
     for (let i = 0; i <= val; i++) initCounts[i] = 0;
     setCounts(initCounts);
     setTotalThrows(0);
-    setLastRoll(null);
   };
 
   // 던지기 실행
@@ -52,26 +49,20 @@ export default function Home() {
         setCurrentStates(newStates);
         setCounts((prev) => ({ ...prev, [flats]: (prev[flats] || 0) + 1 }));
         setTotalThrows((prev) => prev + 1);
-        setLastRoll(flats);
         setIsRolling(false);
       }, 400);
     } else {
       const nextCounts = { ...counts };
       let last = currentStates;
-      let lastFlats = 0;
       for (let i = 0; i < times; i++) {
         const s = Array.from({ length: stickCount }, () => Math.random() < 0.5);
         const f = s.filter(Boolean).length;
         nextCounts[f] = (nextCounts[f] || 0) + 1;
-        if (i === times - 1) {
-          last = s;
-          lastFlats = f;
-        }
+        if (i === times - 1) last = s;
       }
       setCurrentStates(last);
       setCounts(nextCounts);
       setTotalThrows((prev) => prev + times);
-      setLastRoll(lastFlats);
     }
   };
 
@@ -81,7 +72,6 @@ export default function Home() {
     setCounts(initCounts);
     setTotalThrows(0);
     setCurrentStates(Array(stickCount).fill(false));
-    setLastRoll(null);
   };
 
   const totalMicrostates = Math.pow(2, stickCount);
@@ -151,7 +141,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 결과 막대그래프 (0% ~ 100% 절대 확률 스케일 & 개수 표시) */}
+        {/* 결과 막대그래프 (0% ~ 100% 절대 확률 스케일) */}
         <div className="bg-stone-900 border border-stone-800 p-5 rounded-xl flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-baseline mb-1">
@@ -236,11 +226,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 하단 전통 윷판 시스템 (팀 수, 팀당 말 수 포함) */}
-      <div className="w-full">
-        <YutBoard lastRoll={lastRoll} />
       </div>
     </main>
   );
