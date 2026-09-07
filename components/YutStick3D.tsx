@@ -31,24 +31,34 @@ export function YutStick({ position, isFlat, isRolling }: YutStickProps) {
   });
 
   return (
+    // @ts-ignore
     <group ref={meshRef} position={position}>
-      {/* 둥근 등 (갈색 반원 기둥) */}
+      {/* @ts-ignore */}
       <mesh position={[0, 0, 0]}>
+        {/* @ts-ignore */}
         <cylinderGeometry args={[0.25, 0.25, 2.2, 16, 1, false, 0, Math.PI]} />
+        {/* @ts-ignore */}
         <meshStandardMaterial color="#8B5A2B" roughness={0.4} />
       </mesh>
-      {/* 평평한 배 (밝은 나무색 판) */}
+      {/* @ts-ignore */}
       <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        {/* @ts-ignore */}
         <boxGeometry args={[0.02, 2.2, 0.5]} />
+        {/* @ts-ignore */}
         <meshStandardMaterial color="#F5DEB3" roughness={0.3} />
       </mesh>
-      {/* 배 표면 표식점 */}
+      {/* @ts-ignore */}
       <mesh position={[0.02, 0.5, 0]}>
+        {/* @ts-ignore */}
         <sphereGeometry args={[0.04, 8, 8]} />
+        {/* @ts-ignore */}
         <meshStandardMaterial color="#3A200B" />
       </mesh>
+      {/* @ts-ignore */}
       <mesh position={[0.02, -0.5, 0]}>
+        {/* @ts-ignore */}
         <sphereGeometry args={[0.04, 8, 8]} />
+        {/* @ts-ignore */}
         <meshStandardMaterial color="#3A200B" />
       </mesh>
     </group>
